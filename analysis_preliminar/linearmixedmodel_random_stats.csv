@@ -1,0 +1,5 @@
+"","effect","group","term","estimate"
+"1","ran_pars","distrito_nombre2","var__(Intercept)",30049.0883608306
+"2","ran_pars","distrito_nombre2","var__anho",72.5728983435308
+"3","ran_pars","distrito_nombre2","cov__(Intercept).anho",383.789947732
+"4","ran_pars","Residual","var__Observation",16095.6029368687
