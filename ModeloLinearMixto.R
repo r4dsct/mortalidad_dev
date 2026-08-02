@@ -163,8 +163,8 @@ datos_df$distrito_nombre2 <-paste(datos_df$cod_distrito,datos_df$distrito_nombre
 distrito_modelo1 <- lmer(def_100mil~anho +(anho|distrito_nombre2),data=datos_df)
 distrito_modelo2 <- lmer(def_100mil~canton_nombre2+anho +(anho|distrito_nombre2),data=datos_df)
 
-
 # Comparamos cuál modelo es más parsimonioso
+
 AICc(distrito_modelo1,distrito_modelo2)
 # y exploramos su capacidad predictiva
 model_performance(distrito_modelo2)
@@ -204,11 +204,12 @@ re.form=NA)
 
 # Comparamos entradas y predicciones.
 ggplot(data = pred_df, aes(x=def_100mil, y = y_w)) +
+  facet_wrap(~I(anho+min_anho-1))+
   geom_point(size = 1.5) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red")+
   labs(
-x = "Mortalidad observada (defunciones/100 mil habitantes",
-    y = "Mortalidad predecidad (defunciones/100 mil habitantes")+
+x = "Mortalidad observada (defunciones/100 mil habitantes)",
+    y = "Mortalidad predecidad (defunciones/100 mil habitantes)")+
   theme_bw()+
   theme(strip.text = element_text(size=10, face='bold'),
 axis.text = element_text(size=10),
@@ -336,14 +337,5 @@ dbWriteTable(
 
 # # cierra la conexión con la base de datos
 dbDisconnect(con)
-# hist(resumen_modelo_df$def_100mil_promedio)
-# quantile(resumen_modelo_df$def_100mil_promedio)
-
-
-# hist(resumen_modelo_df$pendiente_corregida)
-# quantile(resumen_modelo_df$pendiente_corregida)
-
-plot(resumen_modelo_df$def_100mil_promedio[resumen_modelo_df$def_100mil_promedio<1500],
-   resumen_modelo_df$pendiente_corregida[resumen_modelo_df$def_100mil_promedio<1500])
 
 
