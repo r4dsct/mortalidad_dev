@@ -1,0 +1,16 @@
+Tasa de mortalidad
+En este análisis se utilizaron los distintos archivos de defunciones distritales publicados por el INEC anualmente. Los datos (n=5342) fueron transcritos a un único archivo, del cual una copia de este se encuentra en el repositorio bajo el nombre ‘datos_mortalidad\mortalidad_20142024.csv’. Del INEC también se obtuvieron los estimados de población distrital a partir del 2000 publicados en el 2025. Los datos fueron transcritos a un formato más apto para su análisis. La copia de estos datos en el repositorio se llama ‘datos_mortalidad\estimados_poblacion_distrito_inec2025.csv’. Es importante señalar que solamente se realizó una revisión superficial de la transcripción de los datos de mortalidad y población. Se espera llevar a cabo una revisión más profunda en el futuro próximo para confirmar que no existen errores.
+Con la unión de los estimados de población y defunciones distritales anuales del INEC para los años 2013 a 2024, se calculó la tasa de mortalidad d (expresada como defunciones por cien mil habitantes) para cada distrito y año.  
+
+Análisis estadístico
+Para modelar el cambio temporal en d durante el periodo 2013 – 2024 se ajustaron modelos lineales mixtos a estos datos. Se escogieron estos modelos pues proveen ventajas para analizar datos donde los factores están enclavados en otros factores jerárquicamente, o cuando las mediciones se hacen repetidamente sobre el mismo sujeto. En el caso de la tasa de mortalidad, por ejemplo, solo se cuenta con una observación de d para cada par distrito – año y el mismo distrito es medido repetidamente.
+
+Los siguientes modelos lineales mixtos se ajustaron a los datos:
+
+1)	d = año +(año|distrito)
+2)	d = cantón+año (año |distrito)
+
+En estos modelos año y cantón son tratados como factores fijos, mientras que distrito es un factor aleatorio para el cual se ajusta un intercepto y una pendiente adicional. Se analizó la distribución y condiciones de los residuos del modelo para valorar su calidad.
+Tras comparar los valores de AICc (cita) de ambos modelos se decidió que el segundo fue el más parsimonioso (i.e. mayor poder predictivo con el menor número de parámetros), por lo cual ese se utilizó para generar predicciones y estimar la tasa de mortalidad.
+Para estimar el cambio anual en d distrital se sumó la pendiente fija del factor año y la pendiente del factor aleatorio para cada distrito. 
+El análisis se realizó en R empleando la función ‘lmer’ en el paquete ‘lme4’ para ajustar los modelos lineales mixtos.  
