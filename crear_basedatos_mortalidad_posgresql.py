@@ -380,7 +380,8 @@ def run_main(host_name, port_n, user_name, password_pg, dbname_new, table_list, 
                                 "def_100mil_promedio": 'NUMERIC(10, 2)',
                                 'pendiente': 'NUMERIC(10, 2)',
                                 'error_estandar': 'NUMERIC(10, 2)',
-                                'pendiente_corregida': 'NUMERIC(10, 2)' 
+                                'pendiente_corregida': 'NUMERIC(10, 2)',
+                                'aumento_por': 'NUMERIC(10, 2)' 
                                 }
     create_table(connection_object, table_name_str=nombre_tabla_str, table_col_dict=tabla_parametros_distrito_col_dic)   
     

@@ -325,6 +325,7 @@ resumen_modelo_df <-merge(resumen_modelo_df,
   pendiente_df[,c('pendiente', 'pendiente_corregida', 'error_estandar', 'cod_distrito')],
   by='cod_distrito')
 
+resumen_modelo_df$aumento_por <-round((resumen_modelo_df$pendiente_corregida/resumen_modelo_df$def_100mil_promedio)*100,1)
 # salva la tabla en la base de datos. Ya la tabla estaba lista
 dbWriteTable(
   conn      = con, 
