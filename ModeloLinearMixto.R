@@ -79,7 +79,7 @@ ggplot(data = datos_df, aes(x = poblacion_total, y = defunciones_total)) +
   geom_smooth(method = "lm", color='red')+
   labs(
 x = "Población",
-title = "Relación entre mortalidad y población a nivel de distrito",
+title = "Relación entre mortalidad y población distrital",
     y = "Defunciones")+
   theme_bw()+
   theme(strip.text = element_text(size=12, face='bold'),
@@ -98,9 +98,9 @@ ggplot(data = datos_df, aes(x=def_100mil)) +
   facet_wrap(~(anho+min_anho-1))+
   geom_histogram(fill='blue', col='black') +
   labs(
-x = "Defunciones por cient mil habitantes",
+x = "Defunciones por cien mil habitantes",
 y="Número de distritos",
-title = "Distribución de la mortalidad a nivel de distrito")+
+title = "Distribución de la mortalidad distrital")+
   theme_bw()+
   theme(strip.text = element_text(size=12, face='bold'),
 axis.text = element_text(size=10),
@@ -112,7 +112,7 @@ ggplot(data = datos_df, aes(x=as.factor(I(anho+min_anho-1)), y=def_100mil)) +
   geom_boxplot() +
   labs(
 x = "Año",
-title = "Mortalidad a nivel de distrito, 2013-2024",
+title = "Mortalidad distrital, 2013-2024",
     y = "Defunciones por cien mil habitantes")+
   theme_bw()+
   theme(strip.text = element_text(size=12, face='bold'),
@@ -208,8 +208,8 @@ ggplot(data = pred_df, aes(x=def_100mil, y = y_w)) +
   geom_point(size = 1.5) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red")+
   labs(
-x = "Mortalidad observada (defunciones/100 mil habitantes)",
-    y = "Mortalidad predecidad (defunciones/100 mil habitantes)")+
+x = "Defunciones por cien mil habitantes observadas",
+    y = "Defunciones por cien mil habitantes estimadas")+
   theme_bw()+
   theme(strip.text = element_text(size=10, face='bold'),
 axis.text = element_text(size=10),
@@ -265,7 +265,7 @@ title = paste0('Mortalidad por año y distrito. Cantón: ',provincia_i),
 axis.text = element_text(size=10),
 axis.title=element_text(size=12))+
 scale_x_continuous(breaks = seq(min(esta_provincia_df$anho),max(esta_provincia_df$anho),2))
-ggsave(file.path(cantones_directory,paste0('xyplot_mortalidadAnho_',provincia_i,'.png')))
+ggsave(file.path(cantones_directory,paste0(provincia_i,'_xyplot_mortalidadAnho.png')))
 
 }
 
@@ -310,8 +310,8 @@ resumen_modelo_df <- pred_df %>%
   as.data.frame()
 
 # luego extraemos las pendientes aleatorias asociadas a cada distrito. Limpiamos las columnas
-pendiente_df <- llm_random_df[llm_random_df$term=='anho',c('level', 'estimate','std.error')]
-pendiente_df$cod_distrito <- as.integer(substr(pendiente_df$level, 1, 5))
+llm_random_df$cod_distrito <- as.integer(substr(llm_random_df$level, 1, 5))
+pendiente_df <- llm_random_df[llm_random_df$term=='anho',c('level', 'estimate','std.error', 'cod_distrito')]
 names(pendiente_df) <-c('term','pendiente','error_estandar', 'cod_distrito')
 
 # luego calculamos una tasa de incremento anual (defunciones por 100 mil habitantes/año)
@@ -339,3 +339,4 @@ dbWriteTable(
 dbDisconnect(con)
 
 
+resumen_modelo_df$cambio_por <-(resumen_modelo_df$pendiente_corregida/resumen_modelo_df$def_100mil_promedio)*100
