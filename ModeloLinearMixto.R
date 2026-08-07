@@ -162,18 +162,16 @@ datos_df$distrito_nombre2 <-paste(datos_df$cod_distrito,datos_df$distrito_nombre
 
 distrito_modelo1 <- lmer(def_100mil~anho +(anho|distrito_nombre2),data=datos_df)
 distrito_modelo2 <- lmer(def_100mil~canton_nombre2+anho +(anho|distrito_nombre2),data=datos_df)
-
+distrito_modelo3 <- lmer(def_100mil~canton_nombre2*anho +(anho|distrito_nombre2),data=datos_df)
 # Comparamos cuál modelo es más parsimonioso
 
-AICc(distrito_modelo1,distrito_modelo2)
+AICc(distrito_modelo1,distrito_modelo2, distrito_modelo3)
 # y exploramos su capacidad predictiva
 model_performance(distrito_modelo2)
+model_performance(distrito_modelo3)
 
 # el modelo con el factor de cantón y año es escogido
-distrito_modelo <-distrito_modelo2
-
-summary(distrito_modelo2)
-
+distrito_modelo <-distrito_modelo3
 
 options(max.print=5.5E5)
 summary(distrito_modelo)
@@ -281,7 +279,9 @@ print(llm_fixed_df)
 # limpia un poco las columnas
 llm_fixed_df$term <- str_remove(llm_fixed_df$term,"canton_nombre2")
 llm_fixed_df$group[llm_fixed_df$term=='anho'] <-'pendiente anho'
+llm_fixed_df$group[grepl(':', llm_fixed_df$term)] <-'cantón*anho'
 llm_fixed_df$group[is.na(llm_fixed_df$group)] <-'cantón'
+llm_fixed_df$cod_canton <- as.integer(substr(llm_fixed_df$term, 1, 3))
 
 
 
@@ -305,27 +305,63 @@ file.path(result_directory,'linearmixedmodel_fixed_GOF.csv'))
 
 # primero utilizamos la predicción de defunciones al año (2013 a 2024) como indicador del nivel de mortalidad
 resumen_modelo_df <- pred_df %>%
-  group_by(cod_distrito) %>%
+  group_by(cod_distrito, cod_canton) %>%
   summarise(def_100mil_promedio = mean(y_w, na.rm=TRUE)) %>%
   as.data.frame()
 
 # luego extraemos las pendientes aleatorias asociadas a cada distrito. Limpiamos las columnas
 llm_random_df$cod_distrito <- as.integer(substr(llm_random_df$level, 1, 5))
-pendiente_df <- llm_random_df[llm_random_df$term=='anho',c('level', 'estimate','std.error', 'cod_distrito')]
-names(pendiente_df) <-c('term','pendiente','error_estandar', 'cod_distrito')
+llm_random_df$cod_canton <- as.integer(substr(llm_random_df$level, 1, 3))
+pendiente_df <- llm_random_df[llm_random_df$term=='anho',c('level', 'estimate','std.error', 'cod_distrito', 'cod_canton')]
+names(pendiente_df) <-c('term','pendiente_aleatoria','pendiente_aleatoria_error_estandar', 'cod_distrito','cod_canton')
 
-# luego calculamos una tasa de incremento anual (defunciones por 100 mil habitantes/año)
-# esta la definimos como pendiente_corregida=pendiente_aleatorio_distrital+pendiente_fijo_anho
-# pendiente_alazar_distrital es la pendiente asociada al componente aleatorio distrital del model, mientras que
-# pendiente_fijo_anho es la pendiente controlada del año.
+pendiente_df2 <- llm_random_df[llm_random_df$term=='(Intercept)',c('estimate','std.error', 'cod_distrito')]
+names(pendiente_df2) <-c('intercepto_aleatorio','intercepto_aleatorio_error_estandar', 'cod_distrito')
 
-pendiente_df$pendiente_corregida <- llm_fixed_df$estimate[llm_fixed_df$group=='pendiente anho']+pendiente_df$pendiente
+pendiente_df <-merge(pendiente_df,
+pendiente_df2,
+by='cod_distrito')
+
+
+# extraemos los parámetro fijos del modelo
+pendiente_df$pendiente_anho_fija <-llm_fixed_df$estimate[llm_fixed_df$group =='pendiente anho']
+pendiente_df$pendiente_anho_fija_error_est <-llm_fixed_df$std.error[llm_fixed_df$group =='pendiente anho']
+pendiente_df$intercepto_fijo <-llm_fixed_df$estimate[llm_fixed_df$term =='(Intercept)']
+pendiente_df$intercepto_fijo_error_est <-llm_fixed_df$std.error[llm_fixed_df$term =='(Intercept)']
+
+
+param_fijos_df <-llm_fixed_df[llm_fixed_df$group=='cantón', c('estimate', 'std.error', 'cod_canton')]
+names(param_fijos_df) <-c('pendiente_canton_fija', 'pendiente_canton_fija_error_est', 'cod_canton')
+
+param_fijos_df2 <-llm_fixed_df[llm_fixed_df$group=='cantón*anho', c('estimate', 'std.error', 'cod_canton')]
+names(param_fijos_df2) <-c('pendiente_cantonanho_fija', 'pendiente_cantonanho_fija_error_est', 'cod_canton')
+
+param_fijos_df <-merge(param_fijos_df,
+param_fijos_df2,
+by='cod_canton')
 
 resumen_modelo_df <-merge(resumen_modelo_df,
-  pendiente_df[,c('pendiente', 'pendiente_corregida', 'error_estandar', 'cod_distrito')],
+  pendiente_df[,c('cod_distrito',"pendiente_aleatoria", 
+  "pendiente_aleatoria_error_estandar",
+  "intercepto_aleatorio",
+  "intercepto_aleatorio_error_estandar",
+  "pendiente_anho_fija",
+  "pendiente_anho_fija_error_est",
+  'intercepto_fijo',
+  "intercepto_fijo_error_est")],
   by='cod_distrito')
 
+resumen_modelo_df <-merge(resumen_modelo_df,
+param_fijos_df,
+by='cod_canton')
+
+resumen_modelo_df$pendiente_corregida <- resumen_modelo_df$pendiente_anho_fija+resumen_modelo_df$pendiente_cantonanho_fija+resumen_modelo_df$pendiente_aleatoria
+
+
+
 resumen_modelo_df$aumento_por <-round((resumen_modelo_df$pendiente_corregida/resumen_modelo_df$def_100mil_promedio)*100,1)
+names(resumen_modelo_df)
+
 # salva la tabla en la base de datos. Ya la tabla estaba lista
 dbWriteTable(
   conn      = con, 
@@ -338,6 +374,3 @@ dbWriteTable(
 
 # # cierra la conexión con la base de datos
 dbDisconnect(con)
-
-
-resumen_modelo_df$cambio_por <-(resumen_modelo_df$pendiente_corregida/resumen_modelo_df$def_100mil_promedio)*100

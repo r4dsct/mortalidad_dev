@@ -1,5 +1,5 @@
 "","effect","group","term","estimate"
-"1","ran_pars","distrito_nombre2","var__(Intercept)",30049.0883608306
-"2","ran_pars","distrito_nombre2","var__anho",72.5728983435308
-"3","ran_pars","distrito_nombre2","cov__(Intercept).anho",383.789947732
-"4","ran_pars","Residual","var__Observation",16095.6029368687
+"1","ran_pars","distrito_nombre2","var__(Intercept)",30018.2083658822
+"2","ran_pars","distrito_nombre2","var__anho",72.1337303280902
+"3","ran_pars","distrito_nombre2","cov__(Intercept).anho",385.713982472124
+"4","ran_pars","Residual","var__Observation",16098.5484906913

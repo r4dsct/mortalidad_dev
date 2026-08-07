@@ -376,13 +376,22 @@ def run_main(host_name, port_n, user_name, password_pg, dbname_new, table_list, 
     nombre_tabla_str = 'parametros_modelo_linealmixto_distrito'
     
     tabla_parametros_distrito_col_dic = {'cod_distrito': 'integer',
-                                "estimado": 'NUMERIC(10, 2)',
-                                "def_100mil_promedio": 'NUMERIC(10, 2)',
-                                'pendiente': 'NUMERIC(10, 2)',
-                                'error_estandar': 'NUMERIC(10, 2)',
-                                'pendiente_corregida': 'NUMERIC(10, 2)',
-                                'aumento_por': 'NUMERIC(10, 2)' 
-                                }
+                                         "cod_canton":'integer',
+                                         "def_100mil_promedio": 'NUMERIC(10, 2)',
+                                         "pendiente_aleatoria": 'NUMERIC(10, 2)',
+                                         "pendiente_aleatoria_error_estandar": 'NUMERIC(10, 2)',
+                                         "intercepto_aleatorio": 'NUMERIC(10, 2)',
+                                         "intercepto_aleatorio_error_estandar": 'NUMERIC(10, 2)',
+                                         "pendiente_anho_fija": 'NUMERIC(10, 2)',
+                                         "pendiente_anho_fija_error_est": 'NUMERIC(10, 2)',
+                                         "intercepto_fijo": 'NUMERIC(10, 2)',
+                                         "intercepto_fijo_error_est": 'NUMERIC(10, 2)',
+                                         "pendiente_canton_fija": 'NUMERIC(10, 2)',
+                                         "pendiente_canton_fija_error_est": 'NUMERIC(10, 2)',
+                                         "pendiente_cantonanho_fija": 'NUMERIC(10, 2)',
+                                         "pendiente_cantonanho_fija_error_est": 'NUMERIC(10, 2)',
+                                         "pendiente_corregida": 'NUMERIC(10, 2)',
+                                         "aumento_por": 'NUMERIC(10, 2)'}
     create_table(connection_object, table_name_str=nombre_tabla_str, table_col_dict=tabla_parametros_distrito_col_dic)   
     
     # cierra la conexión a la base de dtos
