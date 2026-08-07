@@ -340,6 +340,16 @@ param_fijos_df <-merge(param_fijos_df,
 param_fijos_df2,
 by='cod_canton')
 
+names(param_fijos_df)
+
+param_fijos_df3 <-data.frame(cod_canton=as.integer(101),
+pendiente_canton_fija=0,
+pendiente_canton_fija_error_est=0,
+pendiente_cantonanho_fija=0,
+pendiente_cantonanho_fija_error_est=0)
+
+param_fijos_df <-rbind(param_fijos_df3,param_fijos_df)
+
 resumen_modelo_df <-merge(resumen_modelo_df,
   pendiente_df[,c('cod_distrito',"pendiente_aleatoria", 
   "pendiente_aleatoria_error_estandar",
